@@ -31,3 +31,15 @@ GROUP BY
 	week_name
 ORDER BY
 	week_name DESC
+
+-- 3. Write a query that calculates the open rate of each campaign.
+
+SELECT
+    s.campaign_id,
+    IFNULL(COUNT(DISTINCT o.user_id), 0) / COUNT(DISTINCT s.user_id) * 100 AS open_rate
+FROM
+    email_send s
+LEFT JOIN
+    email_open o ON s.campaign_id = o.campaign_id AND s.user_id = o.user_id
+GROUP BY
+    s.campaign_id;
