@@ -8,23 +8,26 @@ GROUP BY email_send.campaign_id
 -- 2. Write a query that counts the number of emails sent for each campaign.
 
 SELECT
-	ws.week_start,
-	ws.week_end,
-    CONCAT(YEAR(ws.week_start), '-', WEEK(ws.week_start)) AS week_name,
-    COUNT(es.event_time) AS emails_sent
-FROM (SELECT
-    TIMESTAMP(DATE_SUB(DATE_SUB(CURDATE(), INTERVAL DAYOFWEEK(CURDATE()) - 1 DAY), INTERVAL n WEEK)) AS week_start,
-    TIMESTAMP(DATE_SUB(DATE_SUB(CURDATE(), INTERVAL DAYOFWEEK(CURDATE()) - 1 DAY), INTERVAL n WEEK) + INTERVAL 1 WEEK - INTERVAL 1 SECOND) AS week_end
+	CONCAT(YEAR(ws.week_start), '-', LPAD(WEEK(ws.week_start), 2, "0")) AS week_name,
+	COUNT(es.event_time) AS emails_sent
 FROM (
-    SELECT @row := @row + 1 AS n
-    FROM (select 0 union all select 1) t0,
-         (select 0 union all select 1) t1,
-         (select 0 union all select 1) t2,
-         (select 0 union all select 1) t3,
-         (select 0 union all select 1) t4,
-         (select @row:=-1) t5
-    LIMIT 25
-) AS numbers) ws
-LEFT JOIN email_send es ON es.event_time >= ws.week_start AND es.event_time <= ws.week_end
-GROUP BY week_name, ws.week_start, ws.week_end
-
+	SELECT
+		TIMESTAMP(DATE_SUB(DATE_SUB(CURDATE(), INTERVAL DAYOFWEEK(CURDATE()) - 1 DAY), INTERVAL weeknumber WEEK)) AS week_start,
+		TIMESTAMP(DATE_SUB(DATE_SUB(CURDATE(), INTERVAL DAYOFWEEK(CURDATE()) - 1 DAY), INTERVAL weeknumber WEEK) + INTERVAL 1 WEEK - INTERVAL 1 SECOND) AS week_end
+	FROM (
+		SELECT @row := @row + 1 AS weeknumber
+		FROM (select 0 union all select 1) t0, -- 2
+ 			(select 0 union all select 1) t1, -- 4
+ 			(select 0 union all select 1) t2, -- 8
+ 			(select 0 union all select 1) t3, -- 16
+ 			(select 0 union all select 1) t4, -- 32
+			(select @row:=-1) tr
+		LIMIT 26 -- weeks
+	) AS numbers) ws
+LEFT JOIN
+	email_send es
+		ON es.event_time >= ws.week_start AND es.event_time <= ws.week_end
+GROUP BY
+	week_name
+ORDER BY
+	week_name DESC
