@@ -1,0 +1,6 @@
+
+-- 1. Write a query that counts the number of emails sent for each campaign.
+
+SELECT email_send.campaign_id, COUNT(email_send.user_id)
+FROM `email_send`
+GROUP BY email_send.campaign_id
