@@ -1,6 +1,6 @@
 -- for MySQL 5.7
--- in MySQL 8.0, we can use CTE (Common Table Expressions) to simplify the query
--- in Postgres, we can use generate_series() to simplify the query
+-- in MySQL 8.0, we can use CTE (Common Table Expressions) to simplify 2.
+-- in Postgres, we can use generate_series() to simplify 2.
 
 -- 1. Write a query that counts the number of emails sent for each campaign.
 
